@@ -1,4 +1,5 @@
 import requests
+import time
 
 from customer_validation.config import (
     APP_ID,
@@ -63,15 +64,16 @@ def send_to_records(customer):
         RECORD_FIELDS["balance"]: customer.get(CUSTOMER_FIELDS["balance"]),   # Balance
         RECORD_FIELDS["status"]: customer.get(CUSTOMER_FIELDS["status"]),   # Status
     }
-
-    response = requests.post(
+    # APPLIED FOR LOOP TO RETRY IF UPLOAD FAILED 
+    for retry in range(3):
+        response = requests.post(
             RECORDS_URL,
             headers=headers,
             json=data
         )
-    #print("Status Code:", response.status_code)
-    #print("Response Text:", response.text)
-
+        if response.status_code == 200:
+            return response
+        time.sleep(30)
     return response
     
 
@@ -108,19 +110,22 @@ def send_to_issues(customer, issues):
     }
 #-----------------------------------------------
 #####    SENDING DATA TO KNACK ###########
-    response = requests.post(
-            ISSUES_URL,
-            headers=headers,
-            json=data
-        )
-
-    
+    for retry in range(3):
+            response = requests.post(
+                ISSUES_URL,
+                headers=headers,
+                json=data
+            )
+            if response.status_code == 200:
+                return response
+            time.sleep(30)
+    return response
      # -----------------------------
     # Print response for debugging
     # -----------------------------
     #print("Status Code:", response.status_code)
     #print("Response Text:", response.text)
 
-    return response
+    
 
 
