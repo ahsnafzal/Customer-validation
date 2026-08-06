@@ -141,15 +141,15 @@ def update_customer(customer):
         json={CUSTOMER_FIELDS["is_processed"]:True}
     )
     return response
-#############  ADDING 'FAILED' HEADING TO THOSE ROW OF CUSTOMERS TABLE WHICH ARE FAILED DURING UPLOAD ##########
-def upload_status(customer, response):
-    
+#############  ADDING 'FAILED' AND 'FAIL REASON' HEADING TO THOSE ROW OF CUSTOMERS TABLE WHICH ARE FAILED DURING UPLOAD ##########
+def upload_status_fail_reason(customer, response):
+    error = response.text
     response = requests.put(
         f"{CUSTOMER_URL}/{customer['id']}",
         headers=headers,
         json={CUSTOMER_FIELDS["upload_status"]:"Failed",
-              CUSTOMER_FIELDS["fail_reason"]:error}
-        
+              # ERROR WILL SHOW FAIL REASON OF UPLOADING 
+              CUSTOMER_FIELDS["fail_reason"]:error}  
     )   
     return response
 #######  ADDING REASON FOR FAILED UPLOADING TO CUSTOMER TABLE ROW #####

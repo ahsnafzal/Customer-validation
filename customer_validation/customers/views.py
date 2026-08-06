@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .services import get_customers,send_to_records, send_to_issues, update_customer, upload_status
+from .services import get_customers,send_to_records, send_to_issues, update_customer, upload_status_fail_reason
 from .validators import validate_customer
 from customer_validation.config import CUSTOMER_FIELDS
 
@@ -36,7 +36,7 @@ def customer_list(request):
                 # IF UPLOAD FAILS EVEN AFTER RETRY, IT WILL CALL THIS
                 # FUNCTION WHICH WILL WRITE FAILED IN UPLOAD_STATUS FIELD
             else:
-                upload_status(customer)
+                upload_status_fail_reason(customer,response)
         else:
             response = send_to_issues(customer, issues)
 # IF UPLOAD WAS SUCCESSFUL TO ISSUES TABLE CALL UPDATE CUSTOMER TO UPDATE DATA IN KNACK
@@ -45,7 +45,7 @@ def customer_list(request):
                 # IF UPLOAD FAILS EVEN AFTER RETRY, IT WILL CALL THIS
                 # FUNCTION WHICH WILL WRITE FAILED IN UPLOAD_STATUS FIELD
             else:
-                upload_status(customer)         
+                upload_status_fail_reason(customer,response)        
 
 
     # Return original JSON response
