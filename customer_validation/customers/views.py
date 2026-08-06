@@ -18,9 +18,14 @@ def customer_list(request):
 
     # Loop through every customer record
     for customer in customers["records"]:
+        # APPLIED IF STATEMENT TO CHECK IF DATA IS ALREADY PROCESSED
+        # DON'T DO ANYTHING JUST TELL USTHAT ALREADY PROCESSED BY CHECKING
+        # IS_PROCESSED FIELD FROM CUSTOMERS TABLE ONE BY ONE IF EACH CUSTOMER IS PROCESSED 
+        # IT WILL SKIP ALL PROCESSES FOR THIS CUSTOMER AND GO BACK TO SECOND CUSTOMER
+        if customer.get(CUSTOMER_FIELDS["is_processed"]) == "Yes":
+            print(f"{customer.get(CUSTOMER_FIELDS["customer_id"])} is already processed")
+            continue
         
-        
-
         # Validate current customer
         issues = validate_customer(customer)
 
