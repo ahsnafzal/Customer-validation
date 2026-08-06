@@ -18,6 +18,8 @@ CUSTOMER_FIELDS = {
     "balance": "field_146",
     "status": "field_147",
     "is_processed" : "field_169",
+    "upload_status" : "field_170",
+    "fail_reason" : "field_171",
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {
