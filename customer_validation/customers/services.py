@@ -28,13 +28,14 @@ RECORDS_URL = (
 ISSUES_URL = (
     f"https://api.knack.com/v1/objects/{ISSUES_OBJECT}/records"
 )
-                      #FETCHING DATA FROM KNACK
+###########         FETCHING DATA FROM KNACK      ###############
 def get_customers():
 
     response = requests.get(
         CUSTOMER_URL,
         headers=headers
     )
+    
 
     return response.json()
 
@@ -63,6 +64,10 @@ def send_to_records(customer):
         RECORD_FIELDS["join_date"]: customer.get(CUSTOMER_FIELDS["join_date"]),   # Join Date
         RECORD_FIELDS["balance"]: customer.get(CUSTOMER_FIELDS["balance"]),   # Balance
         RECORD_FIELDS["status"]: customer.get(CUSTOMER_FIELDS["status"]),   # Status
+        # CONNECTION FIELD 'CUSTOMER' WILL STORE KNACK
+        # INTERNAL UNIQUE ID ASSIGNED TO  EACH CUSTOMER
+        # IT WILL HELP TO IDENTIFY WHICH CUSTOMER OWNS THIS ROW
+        RECORD_FIELDS["Customer"]: customer.get("id"),
     }
     # APPLIED FOR LOOP TO RETRY IF UPLOAD FAILED 
     for retry in range(3):
@@ -106,6 +111,8 @@ def send_to_issues(customer, issues):
         ISSUE_FIELDS["balance"] : customer.get(CUSTOMER_FIELDS["balance"]),   # Balance
         ISSUE_FIELDS["status"] : customer.get(CUSTOMER_FIELDS["status"]),   # Status
         ISSUE_FIELDS["issue_detail"] : issue_detail,
+        ISSUE_FIELDS["customer_connection"] : customer.get("id"),
+
 
     }
 #-----------------------------------------------
@@ -126,6 +133,14 @@ def send_to_issues(customer, issues):
     #print("Status Code:", response.status_code)
     #print("Response Text:", response.text)
 
+##########  UPDATING EXISTING CUSTOMER'S FIELD TO TRUE IF HE IS UPLOADED TO RECORDS OR ISSUES
+def update_customer(customer):
+    response = requests.put(
+        f"{CUSTOMER_URL}/{customer['id']}",
+        headers=headers,
+        json={CUSTOMER_FIELDS["is_processed"]:True}
+    )
+    return response
     
 
 

@@ -17,6 +17,7 @@ CUSTOMER_FIELDS = {
     "join_date": "field_145",
     "balance": "field_146",
     "status": "field_147",
+    "is_processed" : "field_169",
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {
@@ -30,6 +31,7 @@ RECORD_FIELDS = {
     "join_date": "field_154",
     "balance": "field_155",
     "status": "field_156",
+    "Customer": "field_167",
 }
 
 ######## CUSTOMER TO ISSUES MAPPING ########
@@ -45,4 +47,5 @@ ISSUE_FIELDS = {
     "balance": "field_164",
     "status": "field_165",
     "issue_detail": "field_166",
+    "customer_connection" : "field_168",
 }
