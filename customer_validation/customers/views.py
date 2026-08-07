@@ -7,46 +7,48 @@ from customer_validation.config import CUSTOMER_FIELDS
 
 def customer_list(request):
     """
-    Fetch customer records from Knack,
-    validate them and return the data.
+    Fetch customer data, validate it,
+    and upload it to the appropriate table.
     """
 
-    # Get all customers from Knack
+    # Fetch all customer records from Knack
     customers = get_customers()
     
 
-    # Loop through every customer record
+    # Process each customer one by one
     for customer in customers["records"]:
-        # APPLIED IF STATEMENT TO CHECK IF DATA IS ALREADY PROCESSED
-        # DON'T DO ANYTHING JUST TELL USTHAT ALREADY PROCESSED BY CHECKING
-        # IS_PROCESSED FIELD FROM CUSTOMERS TABLE ONE BY ONE IF EACH CUSTOMER IS PROCESSED 
-        # IT WILL SKIP ALL PROCESSES FOR THIS CUSTOMER AND GO BACK TO SECOND CUSTOMER
+
+        # Skip customers that are already processed
         if customer.get(CUSTOMER_FIELDS["is_processed"]) == "Yes":
-            print(f"{customer.get(CUSTOMER_FIELDS["customer_id"])} is already processed")
+            print(f"{customer.get(CUSTOMER_FIELDS['customer_id'])} is already processed")
             continue
-        
-        # Validate current customer
+
+        # Validate the current customer
         issues = validate_customer(customer)
 
+        # Upload valid customer to Records table
         if not issues:
-            response = send_to_records(customer) 
-# IF UPLOAD WAS SUCCESSFUL TO RECORDS TABLE CALL UPDATE CUSTOMER TO UPDATE DATA IN KNACK
+            response = send_to_records(customer)
+
+            # Mark customer as processed if upload succeeds
             if response.status_code == 200:
                 update_customer(customer)
-                # IF UPLOAD FAILS EVEN AFTER RETRY, IT WILL CALL THIS
-                # FUNCTION WHICH WILL WRITE FAILED IN UPLOAD_STATUS FIELD
+
+            # Mark upload as failed if upload fails
             else:
-                upload_status_fail_reason(customer,response)
+                upload_status_fail_reason(customer, response)
+
+        # Upload invalid customer to Issues table
         else:
             response = send_to_issues(customer, issues)
-# IF UPLOAD WAS SUCCESSFUL TO ISSUES TABLE CALL UPDATE CUSTOMER TO UPDATE DATA IN KNACK
+
+            # Mark customer as processed if upload succeeds
             if response.status_code == 200:
                 update_customer(customer)
-                # IF UPLOAD FAILS EVEN AFTER RETRY, IT WILL CALL THIS
-                # FUNCTION WHICH WILL WRITE FAILED IN UPLOAD_STATUS FIELD
+
+            # Mark upload as failed if upload fails
             else:
-                upload_status_fail_reason(customer,response)        
+                upload_status_fail_reason(customer, response)
 
-
-    # Return original JSON response
+    # Return customer data as JSON response
     return JsonResponse(customers)

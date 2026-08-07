@@ -1,5 +1,6 @@
 import requests
 import time
+import json
 
 from customer_validation.config import (
     APP_ID,
@@ -30,13 +31,25 @@ ISSUES_URL = (
 )
 ###########         FETCHING DATA FROM KNACK      ###############
 def get_customers():
+    # ADDING A FILTER TO SKIP THE DOWNLOADING OF ROWS WITH FAILED STATUS 
+    filters = {
+        "rules":[
+            {
+                "field":CUSTOMER_FIELDS["upload_status"],
+                "operator": "is not",
+                "value": "Failed"
+            }
+        ]
+    }
 
     response = requests.get(
         CUSTOMER_URL,
-        headers=headers
+        headers=headers,
+        params= {
+            "filters": json.dumps(filters)
+        }
     )
     
-
     return response.json()
 
 
@@ -152,7 +165,7 @@ def upload_status_fail_reason(customer, response):
               CUSTOMER_FIELDS["fail_reason"]:error}  
     )   
     return response
-#######  ADDING REASON FOR FAILED UPLOADING TO CUSTOMER TABLE ROW #####
+
 
 
 
