@@ -31,8 +31,7 @@ ISSUES_URL = (
 )
 ###########         FETCHING DATA FROM KNACK      ###############
 def get_customers():
-    
-# ADDING A FILTER TO SKIP THE DOWNLOADING OF ROWS WITH FAILED STATUS 
+    # ADDING A FILTER TO SKIP THE DOWNLOADING OF ROWS WITH FAILED STATUS 
     filters = {
         "rules":[
             {
@@ -92,7 +91,7 @@ def send_to_records(customer):
         )
         if response.status_code == 200:
             return response
-        time.sleep(5)
+        time.sleep(30)
     return response
     
 
@@ -139,7 +138,7 @@ def send_to_issues(customer, issues):
             )
             if response.status_code == 200:
                 return response
-            time.sleep(5)
+            time.sleep(30)
     return response
      # -----------------------------
     # Print response for debugging

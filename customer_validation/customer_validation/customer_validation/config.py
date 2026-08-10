@@ -1,7 +1,6 @@
 APP_ID = "6a6ce9ae7f6f712f00ffc8d7"
 API_KEY = "ecce8d9a-f705-476f-9005-dd4c97f2583b"
 
-
 CUSTOMER_OBJECT = "object_3"
 ISSUES_OBJECT = "object_10"
 RECORDS_OBJECT = "object_11"
