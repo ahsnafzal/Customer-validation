@@ -2,15 +2,19 @@ import requests
 import time
 import json
 
+
 from customer_validation.config import (
     APP_ID,
     API_KEY,
     CUSTOMER_OBJECT,
     RECORDS_OBJECT,
     ISSUES_OBJECT,
+    USERS_OBJECT,
     CUSTOMER_FIELDS,
     RECORD_FIELDS,
-    ISSUE_FIELDS
+    ISSUE_FIELDS,
+    USER_FIELDS
+    
 )
 
 headers = {
@@ -28,6 +32,9 @@ RECORDS_URL = (
 
 ISSUES_URL = (
     f"https://api.knack.com/v1/objects/{ISSUES_OBJECT}/records"
+)
+USERS_URL = (
+    f"https://api.knack.com/v1/objects/{USERS_OBJECT}/records"
 )
 ###########         FETCHING DATA FROM KNACK      ###############
 def get_customers():
@@ -167,7 +174,26 @@ def upload_status_fail_reason(customer, response):
     )   
     return response
 
+# getting users from knack users table 
+def get_users():
+    response = requests.get(
+        USERS_URL,
+        headers=headers,
+        
+    )
+    return response.json()
+    
 
 
+## ASSIGN USER FUCNTION CREATED TO UPDATE THE 'ASSIGNED_USER' FIELD WITH USER NAME FROM USERS TABLE 
+def assign_user(customer, user):
+
+    response = requests.put(
+        f"{CUSTOMER_URL}/{customer['id']}",
+        headers=headers,
+        json={CUSTOMER_FIELDS["Assigned_user"]:user["id"]}
+    )
+    return response
+    
 
 

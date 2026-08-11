@@ -3,8 +3,9 @@ API_KEY = "ecce8d9a-f705-476f-9005-dd4c97f2583b"
 
 
 CUSTOMER_OBJECT = "object_3"
-ISSUES_OBJECT = "object_10"
-RECORDS_OBJECT = "object_11"
+ISSUES_OBJECT = "object_100"
+RECORDS_OBJECT = "object_111"
+USERS_OBJECT = "object_14"
 
 ############    CUSTOMERS MAPPING ########
 CUSTOMER_FIELDS = {
@@ -21,6 +22,7 @@ CUSTOMER_FIELDS = {
     "is_processed" : "field_169",
     "upload_status" : "field_170",
     "fail_reason" : "field_171",
+    "Assigned_user" : "field_199",
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {
@@ -37,7 +39,7 @@ RECORD_FIELDS = {
     "Customer": "field_167",
 }
 
-######## CUSTOMER TO ISSUES MAPPING ########
+######## ISSUES MAPPING ########
 ISSUE_FIELDS = {
     "customer_id": "field_114",
     "first_name": "field_157",
@@ -51,4 +53,9 @@ ISSUE_FIELDS = {
     "status": "field_165",
     "issue_detail": "field_166",
     "customer_connection" : "field_168",
+}
+
+######## USERS MAPPING ########
+USER_FIELDS = {
+    "Name" : "field_191",
 }

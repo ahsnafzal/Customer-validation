@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from itertools import cycle
 from django.http import JsonResponse
-from .services import get_customers,send_to_records, send_to_issues, update_customer, upload_status_fail_reason
+from .services import get_customers,send_to_records, send_to_issues, update_customer, upload_status_fail_reason, get_users, assign_user
 from .validators import validate_customer
 from customer_validation.config import CUSTOMER_FIELDS
 from .utils.email import upload_fail_email, application_error_email
@@ -18,7 +19,13 @@ def customer_list(request):
         customers = get_customers()
 
 # FAILED ROWS LIST IS CREATED TO STORE ALL FAILED ROWS
-    
+        users = get_users()
+# extract list of users from whole dictionary of users 
+        user_records = users["records"]
+#CREATING CYCLE OF USERS FROM USERS TABLE LIKE A->B->C->A->B.....
+        user_cycle = cycle(user_records)
+        
+        
     
 # Process each customer one by one
         for customer in customers["records"]:
@@ -44,6 +51,8 @@ def customer_list(request):
 # Mark upload as failed if upload fails
                 else:
                     upload_status_fail_reason(customer, response)
+                    user = next(user_cycle)
+                    assign_user(customer, user)
                     failed_rows.append({
                         "customer_id": customer.get(CUSTOMER_FIELDS["customer_id"]),
                         "first_name": customer.get(CUSTOMER_FIELDS["first_name"]),
@@ -66,6 +75,9 @@ def customer_list(request):
 # Mark upload_status as failed if upload fails
                 else:
                     upload_status_fail_reason(customer, response)
+# next(user_cycle) tells that take user from cycle and assign this current failed upload to the user 
+                    user = next(user_cycle)
+                    assign_user(customer, user)
                     failed_rows.append({
                         "customer_id": customer.get(CUSTOMER_FIELDS["customer_id"]),
                         "first_name": customer.get(CUSTOMER_FIELDS["first_name"]),
@@ -75,6 +87,8 @@ def customer_list(request):
                         })
         if failed_rows:
             upload_fail_email(failed_rows)
+            
+            
 
 # Return customer data as JSON response
         return JsonResponse(customers)
