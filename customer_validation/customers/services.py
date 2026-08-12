@@ -1,7 +1,7 @@
 import requests
 import time
 import json
-
+from customer_validation.config import retry_upload
 
 from customer_validation.config import (
     APP_ID,
@@ -13,7 +13,8 @@ from customer_validation.config import (
     CUSTOMER_FIELDS,
     RECORD_FIELDS,
     ISSUE_FIELDS,
-    USER_FIELDS,
+    USER_FIELDS
+    
 )
 
 headers = {
@@ -84,11 +85,7 @@ def send_to_records(customer):
         RECORD_FIELDS["Customer"]: customer.get("id"),
     }
     # APPLIED FOR LOOP TO RETRY IF UPLOAD FAILED
-    for retry in range(3):
-        response = requests.post(RECORDS_URL, headers=headers, json=data)
-        if response.status_code == 200:
-            return response
-        time.sleep(5)
+    response = retry_upload(RECORDS_URL, headers, data)
     return response
 
 
@@ -131,13 +128,11 @@ def send_to_issues(customer, issues):
         ISSUE_FIELDS["customer_connection"]: customer.get("id"),
     }
     # -----------------------------------------------
-    #####    SENDING DATA TO KNACK ###########
-    for retry in range(3):
-        response = requests.post(ISSUES_URL, headers=headers, json=data)
-        if response.status_code == 200:
-            return response
-        time.sleep(5)
+    #####    retry logic if upload fails ###########
+    response = retry_upload(ISSUES_URL, headers, data)
+    print (response.text)
     return response
+
     # -----------------------------
     # Print response for debugging
     # -----------------------------

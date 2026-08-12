@@ -1,3 +1,6 @@
+import requests, time
+
+
 APP_ID = "6a6ce9ae7f6f712f00ffc8d7"
 API_KEY = "ecce8d9a-f705-476f-9005-dd4c97f2583b"
 
@@ -60,3 +63,17 @@ USER_FIELDS = {
     "Name": "field_191",
     "Last Assigned User": "field_200",
 }
+
+######## retry logic if upload failed
+def retry_upload(url, headers, data):
+    for retry in range(3):
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            return response
+        time.sleep(3)
+    return response
+    
+
+        
+    
+        
