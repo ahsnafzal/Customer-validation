@@ -19,10 +19,10 @@ CUSTOMER_FIELDS = {
     "join_date": "field_145",
     "balance": "field_146",
     "status": "field_147",
-    "is_processed" : "field_169",
-    "upload_status" : "field_170",
-    "fail_reason" : "field_171",
-    "Assigned_user" : "field_199",
+    "is_processed": "field_169",
+    "upload_status": "field_170",
+    "fail_reason": "field_171",
+    "Assigned_user": "field_199",
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {
@@ -52,10 +52,11 @@ ISSUE_FIELDS = {
     "balance": "field_164",
     "status": "field_165",
     "issue_detail": "field_166",
-    "customer_connection" : "field_168",
+    "customer_connection": "field_168",
 }
 
 ######## USERS MAPPING ########
 USER_FIELDS = {
-    "Name" : "field_191",
+    "Name": "field_191",
+    "Last Assigned User": "field_200",
 }
