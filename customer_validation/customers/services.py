@@ -1,7 +1,8 @@
 import requests
-import time
+
 import json
 from customer_validation.config import retry_upload
+from .models import Batch, PendingCustomer
 
 from customer_validation.config import (
     APP_ID,
@@ -48,6 +49,41 @@ def get_customers():
     )
 
     return response.json()
+
+###################################################################################################
+# Fetch customers from get_customers() and save them as a new pending batch to django db sqlite
+# to use that data for validating and uploading 
+def save_to_batch():
+    customers = get_customers()
+    batch = Batch.objects.create()
+    
+    for customer in customers["records"]:
+        PendingCustomer.objects.create(
+            batch=batch,
+            data=customer
+        )
+    return batch
+
+
+###########################################################################
+# FUNCTION TO GET OLDEST BATCH SAVED IN DATABASE BATCH TABLE TO VALIDATE AND UPLOAD DATA IN IT
+def get_oldest_batch():
+    # get the batch with pending status and first oldest created 
+    batch = Batch.objects.filter(status="pending").order_by("created_at").first()
+    return batch
+
+
+## FUNCTION TO FETCH ALL CUSTOMERS INSIDE EACH THE BATCH
+def get_customers_from_batch(batch):
+    # Give me all PendingCustomer records that belong to this batch
+    customers = batch.customers.all()
+    return customers
+    
+
+
+
+    
+
 
 
 # -----------------------------------------------------------
@@ -184,9 +220,8 @@ def assign_user(customer, user):
     )
     return response
 
-## Function to update existing field in users table to assign last user assigned by round robin
+## Function to update existing field in users table to assign last user assigned by enumerate cycle
 def update_assigned_user(user, storage_row ):
-    #assigned_user → the user selected by round robin
     #storage_row   → the Users-table row used to store the state
     response = requests.put(
         f"{USERS_URL}/{storage_row['id']}",
