@@ -169,12 +169,6 @@ def send_to_issues(customer, issues):
     print (response.text)
     return response
 
-    # -----------------------------
-    # Print response for debugging
-    # -----------------------------
-    # print("Status Code:", response.status_code)
-    # print("Response Text:", response.text)
-
 
 ##########  UPDATING EXISTING CUSTOMER'S FIELD TO TRUE IF HE IS UPLOADED TO RECORDS OR ISSUES
 def update_customer(customer):
