@@ -1,0 +1,16 @@
+<h2>Customer Upload Failures</h2>
+
+<p>The customer processing has finished.</p>
+
+<p>The following rows failed to upload:</p>
+
+<ul>
+    {% for row in failed_rows %}
+        <li>
+            Customer ID: {{ row.customer_id }}<br>
+            Name : {{ row.first_name }} {{ row.last_name }}<br>
+            Upload Status : {{ row.upload_status }}<br>
+            Reason: {{ row.fail_reason }}
+        </li>
+    {% endfor %}
+</ul>
