@@ -1,63 +1,22 @@
-# SETTINGS.PY - WHAT'S USED
-
-## Imports
-- pathlib.Path (file paths)
-- dotenv (loads .env file)
-- os (environment variables)
-
-## Key Settings
-- Django 4.2
-- SECRET_KEY (hardcoded - move to .env)
-- DEBUG = True (development only)
-- ALLOWED_HOSTS = [] (add domains for production)
-- SQLite database (change to PostgreSQL)
-
-## Installed Apps
-- django.contrib.admin
-- django.contrib.auth
-- django.contrib.contenttypes
-- django.contrib.sessions
-- django.contrib.messages
-- django.contrib.staticfiles
-- rest_framework (DRF for APIs)
-- customers (your custom app)
-
-## Middleware
-- SecurityMiddleware
-- SessionMiddleware
-- CommonMiddleware
-- CsrfViewMiddleware
-- AuthenticationMiddleware
-- MessageMiddleware
-- XFrameOptionsMiddleware
-
-## Database
-- SQLite3 (development only)
-- Needs: psycopg2-binary for PostgreSQL
-
-## Email
-- Brevo API integration
-- BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-
-## Other
-- STATIC_URL = "static/"
-- LANGUAGE_CODE = "en-us"
-- TIME_ZONE = "UTC"
-- Password validators enabled
-
-## Requirements.txt Needed
-- Django==4.2.0
-- djangorestframework==3.14.0
-- python-dotenv==1.0.0
-- psycopg2-binary==2.9.6 (PostgreSQL)
-- django-anymail==9.2 (Brevo email)
-- whitenoise==6.4.0 (production static files)
-
-## Production Changes Needed
-1. DEBUG = False
-2. SECRET_KEY → .env
-3. ALLOWED_HOSTS = ["yourdomain.com"]
-4. Switch to PostgreSQL
-5. Add SECURE_SSL_REDIRECT = True
-6. Add SESSION_COOKIE_SECURE = True
-7. Add CSRF_COOKIE_SECURE = True
+asgiref==3.12.1
+black==26.5.1
+certifi==2026.7.22
+charset-normalizer==3.4.9
+click==8.4.2
+colorama==0.4.6
+Django==6.0.7
+django-anymail==13.1
+djangorestframework==3.16.1
+idna==3.18
+mypy_extensions==1.1.0
+packaging==26.3
+pathspec==1.1.1
+platformdirs==4.11.1
+psycopg2-binary==2.9.10
+python-dotenv==1.1.1
+pytokens==0.4.1
+requests==2.34.2
+sqlparse==0.5.5
+tzdata==2026.3
+urllib3==2.7.0
+whitenoise==6.9.0

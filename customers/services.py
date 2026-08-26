@@ -120,6 +120,8 @@ def send_to_records(customer):
         # IT WILL HELP TO IDENTIFY WHICH CUSTOMER OWNS THIS ROW
         RECORD_FIELDS["Customer"]: customer.get("id"),
     }
+    print("CUSTOMER KNACK ID:", customer.get("id"))
+    print("RECORD CUSTOMER FIELD:", RECORD_FIELDS["Customer"])
     # APPLIED FOR LOOP TO RETRY IF UPLOAD FAILED
     response = retry_upload(RECORDS_URL, headers, data)
     return response
@@ -163,6 +165,7 @@ def send_to_issues(customer, issues):
         ISSUE_FIELDS["issue_detail"]: issue_detail,
         ISSUE_FIELDS["customer_connection"]: customer.get("id"),
     }
+    
     # -----------------------------------------------
     #####    retry logic if upload fails ###########
     response = retry_upload(ISSUES_URL, headers, data)

@@ -4,12 +4,18 @@ from datetime import datetime
 
 # Validate one customer record.
 def validate_customer(customer):
+    
+    print("VALIDATING CUSTOMER:", customer.get("id"))
+
+    for key, value in customer.items():
+      if value is None:
+        print("NONE VALUE:", key)
     # list is created to store the issue before uploading it to database table
     issues = []
 
     # ---------------------------------------------------
     #################      CUSTOMER ID      ###############
-    customer_id = customer.get("field_138").strip()
+    customer_id = customer.get("field_30").strip()
     if not customer_id:
         issues.append("Missing customer id")
     elif not re.match(r"^C\d+$", customer_id):
@@ -18,13 +24,13 @@ def validate_customer(customer):
     # ---------------------------------------------------
     #################      NAMES CHECKING      ###############
     # Get customer name safely
-    first_name = customer.get("field_139", "").strip()
+    first_name = customer.get("field_31", "").strip()
 
     # Check if name exists
     if not first_name:
         issues.append("Missing first name")
 
-    last_name = customer.get("field_140", "").strip()
+    last_name = customer.get("field_32", "").strip()
 
     if not last_name:
         issues.append("Missing last name")
@@ -32,7 +38,7 @@ def validate_customer(customer):
     # ---------------------------------------------------------
     #########    EMAIL CHECKING        #############
     # checking if email exists or inavlid
-    raw_email = customer.get("field_141_raw", "")
+    raw_email = customer.get("field_33_raw", "")
     # taking out email string from raw email dictionary skiping label 'email' is a key value here
     if isinstance(raw_email, dict):
         email = raw_email.get("email", "").strip()
@@ -47,7 +53,7 @@ def validate_customer(customer):
     # --------------------------------------------------------------------------
     #########   PHONE VALIDATION     ##############
 
-    phone = str(customer.get("field_142", "")).strip()
+    phone = str(customer.get("field_34", "")).strip()
     if not phone:
         issues.append("Missing phone")
 
@@ -56,7 +62,7 @@ def validate_customer(customer):
 
     # -----------------------------------------------------------
     #################   SIGNUP DATE VALIDATION       ###############
-    signup_date = customer.get("field_145", "").strip()
+    signup_date = customer.get("field_37", "").strip()
 
     if not signup_date:
         issues.append("Missing Signup Date")
@@ -77,7 +83,7 @@ def validate_customer(customer):
     # --------------------------------------------------------------------------
     ###################      AGE VALIDATION     ########################
 
-    age = str(customer.get("field_143", "")).strip()
+    age = str(customer.get("field_35", "")).strip()
 
     if not age:
         issues.append("Missing age")
