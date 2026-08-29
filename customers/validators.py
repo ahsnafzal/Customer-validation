@@ -62,23 +62,23 @@ def validate_customer(customer):
 
     # -----------------------------------------------------------
     #################   SIGNUP DATE VALIDATION       ###############
-    signup_date = customer.get("field_37", "").strip()
+    join_date = customer.get("field_37", "").strip()
 
-    if not signup_date:
-        issues.append("Missing Signup Date")
+    if not join_date:
+        issues.append("Missing Join Date")
     else:
         try:
             ## Convert text into a real date object
-            signup_date = datetime.strptime(signup_date, "%Y-%m-%d").date()
+            join_date = datetime.strptime(join_date, "%Y-%m-%d").date()
 
             # Get today's current date
             today = datetime.today().date()
 
             # Check if signup date is in the future
-            if signup_date > today:
-                issues.append("Invalid signup date")
+            if join_date > today:
+                issues.append("Invalid joining date")
         except ValueError:
-            issues.append("Invalid Signup Date")
+            issues.append("Invalid joining Date")
 
     # --------------------------------------------------------------------------
     ###################      AGE VALIDATION     ########################
@@ -98,3 +98,6 @@ def validate_customer(customer):
             issues.append("Invalid Age")
 
     return issues
+
+
+

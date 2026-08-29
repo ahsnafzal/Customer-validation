@@ -6,8 +6,8 @@ API_KEY = "5d43922b-885d-440a-b50b-334b2e358292"
 
 
 CUSTOMER_OBJECT = "object_3"
-ISSUES_OBJECT = "object_44"
-RECORDS_OBJECT = "object_55"
+ISSUES_OBJECT = "object_4"
+RECORDS_OBJECT = "object_5"
 USERS_OBJECT = "object_6"
 
 THREAD_WORKERS = 3
@@ -28,6 +28,7 @@ CUSTOMER_FIELDS = {
     "upload_status": "field_66",
     "fail_reason": "field_63",
     "Assigned_user": "field_67",
+    "AI_fixed_issues":"field_119"
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {

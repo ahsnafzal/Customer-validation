@@ -226,3 +226,18 @@ def update_assigned_user(user, storage_row ):
         json={USER_FIELDS["Last Assigned User"]:user['id']}
     )
     return response
+
+
+## Sending the fixed row with AI, to Customers table ti show that what is fixed in this row
+
+def ai_fixed_issue(customer,issues, corrected_customer):
+    
+    update_customer = corrected_customer.copy()
+    update_customer[CUSTOMER_FIELDS["AI_fixed_issues"]] = f"Fixed {issues}"
+    
+    response = requests.put(
+        f"{CUSTOMER_URL}/{customer['id']}",
+        headers=headers,
+        json=update_customer
+    )
+    return response

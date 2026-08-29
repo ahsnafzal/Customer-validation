@@ -14,7 +14,8 @@ from .services import (
     update_assigned_user,
     save_to_batch,
     get_oldest_batch,
-    get_customers_from_batch
+    get_customers_from_batch,
+    ai_fixed_issue
 )
 from .validators import validate_customer
 from customer_validation.config import CUSTOMER_FIELDS, USER_FIELDS, THREAD_WORKERS
@@ -174,14 +175,17 @@ def process_customer(request):
         
 #after ending TRY statement EXCEPT statement will run if any error occur in whole above process
     except Exception as error:
-        application_error_email(error)
+        import traceback
+
+        print("APPLICATION ERROR:")
+        traceback.print_exc()
         return Response({"error": "Application error"}, status=500)
         
         
         
         
         
-        
+from customers.llm_service import customer_fix
 # Worker thread: handles the complete validation and upload process for one customer.
 def process_one_customer(customer):
     
@@ -208,24 +212,56 @@ def process_one_customer(customer):
             
             
 ###################################################################################################
-################### Upload invalid customer to Issues table ###########################################
-    else:
+################### Upload invalid customer to Issues table #######################################
+
+# IF ISSUES FOUND TRY TO FIX THEM USING LLM MODEL  BEFORE SENDING TO ISSUES TABLE
+    else: 
+        
+        corrected_customer = customer_fix(customer, issues)
+        
+        corrected_issues = validate_customer(corrected_customer)
+        
+        
+        if not corrected_issues:
+# if not any issue found then send this corrected customer row to records table 
+            response = ai_fixed_issue(customer,issues, corrected_customer)
+            
+            if response.status_code==200:
+                update_customer(customer)
+                return {
+                    "customer": customer,
+                    "status": "success"
+                    }
+            else:
+                upload_status_fail_reason(customer, response)
+                return {
+                    "customer": customer,
+                    "status": "failed",
+                    "fail_reason": response.text
+                    }
+                
+                
+                
+                
+                
+# if still issues found after correction using LLM then send to issues table  
+        else:
     # use two parametres (customer and issues) because we have to send 
     # also issue detail along with customers
-        response = send_to_issues(customer, issues)
+            response = send_to_issues(customer, issues)
             
-        if response.status_code == 200:
+            if response.status_code == 200:
 # if upload is successful update the upload status to TRUE
-            update_customer(customer)
-            return {
-                "customer": customer,"status": "success"
-                }
+                update_customer(customer)
+                return {
+                    "customer": customer,"status": "success"
+                    }
             
-        else:
-            upload_status_fail_reason(customer, response)
-            return {
-                "customer": customer,"status": "failed","fail_reason": response.text
-                }
+            else:
+                upload_status_fail_reason(customer, response)
+                return {
+                    "customer": customer,"status": "failed","fail_reason": response.text
+                    }
             
 
     
