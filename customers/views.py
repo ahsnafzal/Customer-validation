@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from requests.models import Response as RequestsResponse
 from rest_framework.views import APIView
+from customers.llm_service import customer_fix, fix_failed_customers
 
 
 from .services import (
@@ -15,7 +17,10 @@ from .services import (
     save_to_batch,
     get_oldest_batch,
     get_customers_from_batch,
-    ai_fixed_issue
+    ai_fixed_issue,
+    get_failed_customers,
+    mark_permanently_failed,
+    mark_success_failed_customers,
 )
 from .validators import validate_customer
 from customer_validation.config import CUSTOMER_FIELDS, USER_FIELDS, THREAD_WORKERS
@@ -185,7 +190,8 @@ def process_customer(request):
         
         
         
-from customers.llm_service import customer_fix
+
+
 # Worker thread: handles the complete validation and upload process for one customer.
 def process_one_customer(customer):
     
@@ -223,8 +229,8 @@ def process_one_customer(customer):
         
         
         if not corrected_issues:
-# if not any issue found then send this corrected customer row to records table 
-            response = ai_fixed_issue(customer,issues, corrected_customer)
+# if not any issue found then update this specific row in customers table with corrected customer 
+            response = ai_fixed_issue(customer, issues, corrected_customer)
             
             if response.status_code==200:
                 update_customer(customer)
@@ -262,7 +268,84 @@ def process_one_customer(customer):
                 return {
                     "customer": customer,"status": "failed","fail_reason": response.text
                     }
+                
+                
+     
+     
+     
+     
+
+
+# MAIN THREAD TO GET FAILED CUSTOMERS FROM KNACK AND ASSIGNING WORK TO WORKER THREADS
+@api_view(["POST"])
+def process_failed_customers(request):
+    
+    failed_customers = get_failed_customers()
+    
+    records = failed_customers.get("records", [])
+    
+    results = []
+    
+    with ThreadPoolExecutor(max_workers=THREAD_WORKERS) as executor:
+        
+        futures = [ executor.submit(process_one_failed_customer, customer) for customer in records]
+        for future in futures:
+            result = future.result()
+            results.append(result)
             
+        return Response({
+            "status": "completed",
+            "results": results
+        })
+    
+    
+    
+    
+                
+
+
+            
+# WORKER THREAD WORKING ON EACH FAILED CUSTOMER TO FIX IT AND UPDATE IN KNACK CUSTOMERS TABLE
+def process_one_failed_customer(customer):
+    
+    corrected_customer = fix_failed_customers(customer)
+    
+    response = mark_success_failed_customers(customer, corrected_customer)
+    
+    if response.status_code == 200:
+        return{
+            "customer":customer,
+            "status":"success"
+        }
+    else:
+        mark_permanently_failed(customer, response)
+        return{
+            "customer":customer,
+            "status":"permanently_failed"
+        }
+        
+        
+    
+    
+    
+
+        
+        
+    
+    
+    
+    
+    
+
+        
+        
+    
+    
+
+        
+    
+            
+
 
     
     

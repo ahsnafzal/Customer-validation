@@ -50,6 +50,79 @@ def get_customers():
 
     return response.json()
 
+
+# FETCH ONLY FAILED CUSTOMERS FROM CUSTOMERS DATA TABLE
+def get_failed_customers():
+        # ADDING A FILTER TO SKIP THE DOWNLOADING OF ROWS WITH FAILED STATUS
+    filters = {
+        "rules": [
+            {
+                "field": CUSTOMER_FIELDS["upload_status"],
+                "operator": "is",
+                "value": "Failed",
+            }
+        ]
+    }
+
+    response = requests.get(
+        CUSTOMER_URL, headers=headers, params={"filters": json.dumps(filters)}
+    )
+
+    return response.json()
+
+
+
+# SENDING FAILED CUSTOMERS TO CUSTOMERS TABLE TO UPDATE THE ROW IF IT IS FIXED OR PERMANENTLY FAILED
+def mark_success_failed_customers(customer, corrected_customer):
+    
+    update_customer = corrected_customer.copy()
+    update_customer[CUSTOMER_FIELDS["upload_status"]] = "Success with AI"
+    update_customer[CUSTOMER_FIELDS["AI_fixed_issues"]] = "Fixed with AI"
+    
+    
+    response = requests.put(
+        f"{CUSTOMER_URL}/{customer['id']}",
+        headers=headers,
+        json=update_customer
+    )
+    return response
+
+
+
+
+# IF ERROR IS NOT FIXED WITH AI MARK this ROW PERMANENTLY FAILED
+def mark_permanently_failed(customer, response):
+    response = requests.put(
+        f"{CUSTOMER_URL}/{customer['id']}",
+        headers=headers,
+        json={
+            CUSTOMER_FIELDS["upload_status"]: "Permanently Failed",
+            
+        }
+    )
+    return response
+
+
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ###################################################################################################
 # Fetch customers from get_customers() and save them as a new pending batch to django db sqlite
 # to use that data for validating and uploading 
