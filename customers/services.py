@@ -149,8 +149,30 @@ def get_oldest_batch():
 ## FUNCTION TO FETCH ALL CUSTOMERS INSIDE EACH THE BATCH
 def get_customers_from_batch(batch):
     # Give me all PendingCustomer records that belong to this batch
-    customers = batch.customers.all()
+    customers = batch.customers.filter(status="pending")
     return customers
+
+# FUNCTION TO UPDATE THE STATUS OF CUSTOMER IN ADMIN SIDE TO PROCESSING FROM PENDING
+def update_batch_customer_status(customer, status):
+    customer.status = status
+    customer.save()
+    
+# FUNCTION TO UPDATE THE STATUS OF BATCH IN DBSQLITE TO PROCESSING AND COMPLETED 
+def update_batch_status(batch, status):
+    batch.status = status
+    batch.save()
+    
+# FUNCTION TO CHECK THE STATUS OF EACH CUSTOMER IN BATCH IN DBSQLITE
+def check_customer_status_in_batch(batch):
+    customers = get_customers_from_batch(batch)
+    
+    for customer in customers:
+        status = customer.status
+        
+        if status == "pending" or status == "processing":
+            return True
+    return False   
+        
     
 
 

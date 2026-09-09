@@ -21,6 +21,9 @@ from .services import (
     get_failed_customers,
     mark_permanently_failed,
     mark_success_failed_customers,
+    update_batch_customer_status,
+    update_batch_status,
+    check_customer_status_in_batch
 )
 from .validators import validate_customer
 from customer_validation.config import CUSTOMER_FIELDS, USER_FIELDS, THREAD_WORKERS
@@ -30,18 +33,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 class DownloadView(APIView):
     def get(self, request):
-# SAVE_TO_BATCH CONTAIN GET_CUSTOMERS() SO NO NEED TO CALL IT AGAIN HERE
+        # SAVE_TO_BATCH CONTAIN GET_CUSTOMERS() SO NO NEED TO CALL IT AGAIN HERE
         batch = save_to_batch()
-    
+        
         return Response({
             "message":"successfully downloaded and saved data"
         })
-
-
-
-
-
-                
 
 
 @api_view(["POST"])
@@ -52,52 +49,54 @@ def process_customer(request):
     # --------------------------------------------------
     try:
         
-    # Get the oldest pending batch
-    
+        # Get the oldest pending batch
+        
         batch = get_oldest_batch()
+        
+        
 
         if not batch:
             return Response({
                 "message": "There is no pending batch"
             })
 
-    # Get all customers belonging to this batch
-    
+        # Get all customers belonging to this batch
+        
         customers = get_customers_from_batch(batch)
         
         
         
         
         
-# GET USERS FROM KNACK USERS TABLE TO USE THEM FOR ASSIGNING USER TO FAILD CUSTOMER ONLY
+        # GET USERS FROM KNACK USERS TABLE TO USE THEM FOR ASSIGNING USER TO FAILD CUSTOMER ONLY
         users = get_users()
         # extract list of users from whole dictionary of users
         user_records = users["records"]
                 
-# STORAGE ROW IS THE ROW IN WHICH LAST ASSIGNED USER IS LOCATED SO WE HAVE TO EXTRACT IT
+        # STORAGE ROW IS THE ROW IN WHICH LAST ASSIGNED USER IS LOCATED SO WE HAVE TO EXTRACT IT
         storage_row = user_records[0]
         last_assigned_user = storage_row.get(USER_FIELDS["Last Assigned User"])
 
 
 
-    # This list will store Future objects
-    
+        # This list will store Future objects
+        
         futures = []
     
         failed_rows = []
 
-    # 'THREAD_WORKERS' defined in config.py 
+        # 'THREAD_WORKERS' defined in config.py 
         with ThreadPoolExecutor(max_workers=THREAD_WORKERS) as executor:
 
-        # --------------------------------------------------
-        # SUBMIT CUSTOMERS TO WORKER THREADS
-        # --------------------------------------------------
+            # --------------------------------------------------
+            # SUBMIT CUSTOMERS TO WORKER THREADS
+            # --------------------------------------------------
 
             for pending_customer in customers:
 
                 customer = pending_customer.data
 
-            # Skip customers which have already been processed
+                # Skip customers which have already been processed
                 if customer.get(CUSTOMER_FIELDS["is_processed"]) == "Yes":
 
                     print(
@@ -107,54 +106,61 @@ def process_customer(request):
 
                     continue
 
-# Give this customer to a worker thread
-                future = executor.submit(process_one_customer,customer)
+                # Give this customer to a worker thread
+                future = executor.submit(process_one_customer,customer,pending_customer)
 
-# Store the Future so we can collect its result later
+                # Store the Future so we can collect its result later
                 futures.append(future)
 
-        # --------------------------------------------------
-        # COLLECT RESULTS BY LOOPING ALL FUTURES
-        # --------------------------------------------------
+            # --------------------------------------------------
+            # COLLECT RESULTS BY LOOPING ALL FUTURES
+            # --------------------------------------------------
             for future in futures:
 
-# Wait for this worker to finish and collect the result of row upload FAILED or SUCCESS
+                # Wait for this worker to finish and collect the result of row upload FAILED or SUCCESS
                 result = future.result()
                 
+               
                 
-## APPEND THE FAILED ROWS LIST WITH THE FOLLOWING INFORMATION OF failed CUSTOMERS to send email
+                
+                # APPEND THE FAILED ROWS LIST WITH THE FOLLOWING INFORMATION OF failed CUSTOMERS to send email
                 if result["status"] == "failed":
-# failed_customer variable is created to store result of current FAILED row specifically
+                    # failed_customer variable is created to store result of current FAILED row specifically
                     failed_customer = result["customer"]
                     
                     
-##################### ASSIGNING USER TO FAILED ROWS LOGIC IN A CYCLE #######################
-                   #Find the last assigned user.
-                   #Get their index/position in the user list.
-                   #Select the next user.
-                   #% makes the cycle restart from the first user.
-                   #Assign that selected user to the customer.
+                
+                
+                    
+                    
+                    
+                    # ##################### ASSIGNING USER TO FAILED ROWS LOGIC IN A CYCLE #######################
+                    # #Find the last assigned user.
+                    # #Get their index/position in the user list.
+                    # #Select the next user.
+                    # #% makes the cycle restart from the first user.
+                    # #Assign that selected user to the customer.
                     last_index = -1  
                     for index, user_record in enumerate(user_records):
                         if user_record['id'] == last_assigned_user:
                             last_index = index 
                             break
                     next_index = (last_index+1) % len(user_records)
-# this user will be used in services which will tell KNACK that assign that user to this row
+                    # this user will be used in services which will tell KNACK that assign that user to this row
                     user = user_records[next_index]
-## ASSIGN USER FUCNTION CREATED TO UPDATE THE 'ASSIGNED_USER' FIELD 
+                    # ## ASSIGN USER FUCNTION CREATED TO UPDATE THE 'ASSIGNED_USER' FIELD 
                     assign_user(failed_customer, user)
-## This function helps to update the last assigned user field in users table, with the user assigned
-## just now above by the assign_user() function
+                    # ## This function helps to update the last assigned user field in users table, with the user assigned
+                    # ## just now above by the assign_user() function
                     update_assigned_user(user, storage_row)
-# Save the ID of the user we just assigned as the new "last assigned user"
+                    # # Save the ID of the user we just assigned as the new "last assigned user"
                     last_assigned_user = user['id']
                     
                     
                     
 
 
-## APPEND THE FAILED ROWS LIST WITH THE FOLLOWING INFORMATION OF failed CUSTOMERS to send email
+                    # ## APPEND THE FAILED ROWS LIST WITH THE FOLLOWING INFORMATION OF failed CUSTOMERS to send email
                     failed_rows.append({
                         "customer_id": failed_customer.get(CUSTOMER_FIELDS["customer_id"]),
                         "first_name": failed_customer.get(CUSTOMER_FIELDS["first_name"]),
@@ -165,20 +171,23 @@ def process_customer(request):
 
 
 
-    # ALL CUSTOMERS HAVE FINISHED
+            # ALL CUSTOMERS HAVE FINISHED
 
-# is there are failed rows then send email to notify that following rows are failed 
+            if not check_customer_status_in_batch(batch):
+                update_batch_status(batch, "completed")
+
+            # is there are failed rows then send email to notify that following rows are failed 
             if failed_rows:
                 upload_fail_email(failed_rows)
                 
                 
-# Return customer data as JSON response
+        # Return customer data as JSON response
         return Response({
             "message": "Customers processed successfully"
         })
         
         
-#after ending TRY statement EXCEPT statement will run if any error occur in whole above process
+    # after ending TRY statement EXCEPT statement will run if any error occur in whole above process
     except Exception as error:
         import traceback
 
@@ -193,34 +202,44 @@ def process_customer(request):
 
 
 # Worker thread: handles the complete validation and upload process for one customer.
-def process_one_customer(customer):
+def process_one_customer(customer, pending_customer):
     
     
+    update_batch_customer_status(pending_customer, "processing")
     # validate the customer and store issues in issues list 
     issues = validate_customer(customer)
+    
         
     if not issues:
         response = send_to_records(customer)
         if response.status_code == 200:
-# if upload is successful update the upload status to TRUE
+            
+            # UPDATE THE STATUS IN DBSQLITE TO SUCCESS
+            update_batch_customer_status(pending_customer, "success")
+            
+            # if upload is successful update the upload status to TRUE
             update_customer(customer)
             return {
                 "customer": customer,"status": "success"
-                }
+            }
         else:
-# if upload is not successful then mark upload_status 'FAIL' with 'fail reason'
+            # UPDATE THE STATUS IN DBSQLITE TO FAILED 
+            update_batch_customer_status(pending_customer, "failed")
+            
+            # if upload is not successful then mark upload_status 'FAIL' with 'fail reason'
             upload_status_fail_reason(customer, response)
             return {
                 "customer": customer,"status": "failed","fail_reason": response.text
-                }
+            }
             
             
             
             
-###################################################################################################
-################### Upload invalid customer to Issues table #######################################
+            
+    # ###################################################################################################
+    # ################### Upload invalid customer to Issues table #######################################
 
-# IF ISSUES FOUND TRY TO FIX THEM USING LLM MODEL  BEFORE SENDING TO ISSUES TABLE
+    # IF ISSUES FOUND TRY TO FIX THEM USING LLM MODEL  BEFORE SENDING TO ISSUES TABLE
     else: 
         
         corrected_customer = customer_fix(customer, issues)
@@ -229,45 +248,59 @@ def process_one_customer(customer):
         
         
         if not corrected_issues:
-# if not any issue found then update this specific row in customers table with corrected customer 
+            # if not any issue found then update this specific row in customers table with corrected customer 
             response = ai_fixed_issue(customer, issues, corrected_customer)
             
             if response.status_code==200:
+                # UPDATE THE STATUS IN DBSQLITE TO SUCCESS 
+                update_batch_customer_status(pending_customer, "success")
+                
                 update_customer(customer)
                 return {
                     "customer": customer,
                     "status": "success"
-                    }
+                }
             else:
+                # UPDATE THE STATUS IN DBSQLITE TO FAILED 
+                update_batch_customer_status(pending_customer, "failed")
+                
                 upload_status_fail_reason(customer, response)
                 return {
                     "customer": customer,
                     "status": "failed",
                     "fail_reason": response.text
-                    }
+                }
                 
                 
                 
                 
                 
-# if still issues found after correction using LLM then send to issues table  
+                
+        # if still issues found after correction using LLM then send to issues table  
         else:
-    # use two parametres (customer and issues) because we have to send 
-    # also issue detail along with customers
+            # use two parametres (customer and issues) because we have to send 
+            # also issue detail along with customers
             response = send_to_issues(customer, issues)
             
             if response.status_code == 200:
-# if upload is successful update the upload status to TRUE
+                # UPDATE THE STATUS IN DBSQLITE TO SUCCESS
+                update_batch_customer_status(pending_customer, "success")
+                
+                # if upload is successful update the upload status to TRUE
                 update_customer(customer)
                 return {
                     "customer": customer,"status": "success"
-                    }
+                }
             
             else:
+                # UPDATE THE STATUS IN DBSQLITE TO FAILED 
+                update_batch_customer_status(pending_customer, "failed")
+                
                 upload_status_fail_reason(customer, response)
                 return {
                     "customer": customer,"status": "failed","fail_reason": response.text
-                    }
+                }
+                
                 
                 
      
@@ -323,38 +356,3 @@ def process_one_failed_customer(customer):
             "customer":customer,
             "status":"permanently_failed"
         }
-        
-        
-    
-    
-    
-
-        
-        
-    
-    
-    
-    
-    
-
-        
-        
-    
-    
-
-        
-    
-            
-
-
-    
-    
-
-    
-    
-
-    
-
-                         
-            
-        

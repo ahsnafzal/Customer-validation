@@ -4,6 +4,7 @@ from django.db import models
 class Batch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default="pending")
+    
 
 
 class PendingCustomer(models.Model):
@@ -12,4 +13,5 @@ class PendingCustomer(models.Model):
         on_delete=models.CASCADE,
         related_name="customers"
     )
+    status = models.CharField(max_length=20, default="pending")
     data = models.JSONField()
