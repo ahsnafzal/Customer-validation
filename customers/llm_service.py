@@ -40,10 +40,10 @@ client = Groq(api_key=GROQ_API_KEY)
 def customer_fix(customer, issues):
     # sending only these fields of customers to fix to LLM
     customer_for_llm={
-        "field_30":customer[CUSTOMER_FIELDS["customer_id"]],
-        "field_31": customer[CUSTOMER_FIELDS["first_name"]],
-        "field_32": customer[CUSTOMER_FIELDS["last_name"]],
-        "field_33_raw": customer[CUSTOMER_FIELDS["email"]],
+        "field_23":customer[CUSTOMER_FIELDS["customer_id"]],
+        "field_30": customer[CUSTOMER_FIELDS["first_name"]],
+        "field_31": customer[CUSTOMER_FIELDS["last_name"]],
+        "field_32_raw": customer[CUSTOMER_FIELDS["email"]],
         "field_34": customer[CUSTOMER_FIELDS["phone"]],
         "field_37": customer[CUSTOMER_FIELDS["join_date"]],
         "field_35": customer[CUSTOMER_FIELDS["age"]]
@@ -88,10 +88,10 @@ def customer_fix(customer, issues):
 ## FUNCTION TO FIX THE FAILED ROWS ONLY DURING UPLOAD
 def fix_failed_customers(customer):
     customer_for_llm={
-        "field_30":customer[CUSTOMER_FIELDS["customer_id"]],
-        "field_31": customer[CUSTOMER_FIELDS["first_name"]],
-        "field_32": customer[CUSTOMER_FIELDS["last_name"]],
-        "field_33_raw": customer[CUSTOMER_FIELDS["email"]],
+        "field_23":customer[CUSTOMER_FIELDS["customer_id"]],
+        "field_30": customer[CUSTOMER_FIELDS["first_name"]],
+        "field_31": customer[CUSTOMER_FIELDS["last_name"]],
+        "field_32_raw": customer[CUSTOMER_FIELDS["email"]],
         "field_34": customer[CUSTOMER_FIELDS["phone"]],
         "field_37": customer[CUSTOMER_FIELDS["join_date"]],
         "field_35": customer[CUSTOMER_FIELDS["age"]]
@@ -139,10 +139,10 @@ def fix_failed_customers(customer):
     Input:
 
     {{
-    "field_30": "C2006",
-    "field_31": "Sarah",
-    "field_32": "Smith",
-    "field_33_raw": "sarah@@gmail.com",
+    "field_23": "C2006",
+    "field_30": "Sarah",
+    "field_31": "Smith",
+    "field_32_raw": "sarah@@gmail.com",
     "field_34": 923001112202,
     "field_35": 28,
     "field_37": "2024-02-15"
@@ -154,10 +154,10 @@ def fix_failed_customers(customer):
     Output:
 
     {{
-    "field_30": "C2006",
-    "field_31": "Sarah",
-    "field_32": "Smith",
-    "field_33_raw": "[sarah@gmail.com](mailto:sarah@gmail.com)",
+    "field_23": "C2006",
+    "field_30": "Sarah",
+    "field_31": "Smith",
+    "field_32_raw": "[sarah@gmail.com](mailto:sarah@gmail.com)",
     "field_34": 923001112202,
     "field_35": 28,
     "field_37": "2024-02-15"

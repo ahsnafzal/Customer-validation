@@ -1,8 +1,8 @@
 import requests, time
 
 
-APP_ID = "6a8c49bd2e0c0d59e98bda1e"
-API_KEY = "5d43922b-885d-440a-b50b-334b2e358292"
+APP_ID = "6aa1450abb5820e0bdf1d217"
+API_KEY = "158893b8-c65e-4a49-9a22-281fc2a7f106"
 
 
 CUSTOMER_OBJECT = "object_3"
@@ -14,57 +14,57 @@ THREAD_WORKERS = 3
 
 ############    CUSTOMERS MAPPING ########
 CUSTOMER_FIELDS = {
-    "customer_id": "field_30",
-    "first_name": "field_31",
-    "last_name": "field_32",
-    "email": "field_33_raw",
+    "customer_id": "field_23",
+    "first_name": "field_30",
+    "last_name": "field_31",
+    "email": "field_32_raw",
     "phone": "field_34",
     "age": "field_35",
     "country": "field_36",
     "join_date": "field_37",
     "balance": "field_38",
     "status": "field_39",
-    "is_processed": "field_65",
-    "upload_status": "field_66",
-    "fail_reason": "field_63",
-    "Assigned_user": "field_67",
-    "AI_fixed_issues":"field_119"
+    "is_processed": "field_41",
+    "upload_status": "field_42",
+    "fail_reason": "field_40",
+    "Assigned_user": "field_92",
+    "AI_fixed_issues":"field_43"
 }
 ############   RECORDS MAPPING #########
 RECORD_FIELDS = {
-    "customer_id": "field_104",
-    "first_name": "field_105",
-    "last_name": "field_106",
-    "email": "field_109",
-    "phone": "field_110",
-    "age": "field_111",
-    "country": "field_112",
-    "join_date": "field_115",
-    "balance": "field_116",
-    "status": "field_117",
-    "Customer": "field_118",
+    "customer_id": "field_62",
+    "first_name": "field_69",
+    "last_name": "field_70",
+    "email": "field_71",
+    "phone": "field_72",
+    "age": "field_73",
+    "country": "field_74",
+    "join_date": "field_75",
+    "balance": "field_76",
+    "status": "field_77",
+    "Customer": "field_78",
 }
 
 ######## ISSUES MAPPING ########
 ISSUE_FIELDS = {
-    "customer_id": "field_91",
-    "first_name": "field_92",
-    "last_name": "field_93",
-    "email": "field_94",
-    "phone": "field_95",
-    "age": "field_96",
-    "country": "field_97",
-    "join_date": "field_98",
-    "balance": "field_113",
-    "status": "field_101",
-    "issue_detail": "field_102",
-    "customer_connection": "field_103",
+    "customer_id": "field_44",
+    "first_name": "field_51",
+    "last_name": "field_52",
+    "email": "field_53",
+    "phone": "field_54",
+    "age": "field_55",
+    "country": "field_56",
+    "join_date": "field_57",
+    "balance": "field_61",
+    "status": "field_58",
+    "issue_detail": "field_59",
+    "customer_connection": "field_60",
 }
 
 ######## USERS MAPPING ########
 USER_FIELDS = {
-    "Name": "field_54",
-    "Last Assigned User": "field_61",
+    "Name": "field_79",
+    "Last Assigned User": "field_86",
 }
 
 ######## retry logic if upload failed

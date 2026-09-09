@@ -15,7 +15,7 @@ def validate_customer(customer):
 
     # ---------------------------------------------------
     #################      CUSTOMER ID      ###############
-    customer_id = customer.get("field_30").strip()
+    customer_id = customer.get("field_23").strip()
     if not customer_id:
         issues.append("Missing customer id")
     elif not re.match(r"^C\d+$", customer_id):
@@ -24,13 +24,13 @@ def validate_customer(customer):
     # ---------------------------------------------------
     #################      NAMES CHECKING      ###############
     # Get customer name safely
-    first_name = customer.get("field_31", "").strip()
+    first_name = customer.get("field_30", "").strip()
 
     # Check if name exists
     if not first_name:
         issues.append("Missing first name")
 
-    last_name = customer.get("field_32", "").strip()
+    last_name = customer.get("field_31", "").strip()
 
     if not last_name:
         issues.append("Missing last name")
@@ -38,7 +38,7 @@ def validate_customer(customer):
     # ---------------------------------------------------------
     #########    EMAIL CHECKING        #############
     # checking if email exists or inavlid
-    raw_email = customer.get("field_33_raw", "")
+    raw_email = customer.get("field_32_raw", "")
     # taking out email string from raw email dictionary skiping label 'email' is a key value here
     if isinstance(raw_email, dict):
         email = raw_email.get("email", "").strip()
