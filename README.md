@@ -41,7 +41,7 @@ EMAIL_HOST_PASSWORD=your_app_password
 
 ## Tech Stack
 
-Django, DRF, Knack API, PostgreSQL, SMTP
+Django, DRF, Knack API, PostgreSQL, SMTP, LLM Integration
 
 ## Author
 
